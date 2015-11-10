@@ -16,7 +16,7 @@ public class Menu implements UIInterface{
 
     public static void main(String[] args) {
         Menu menu = new Menu();
-        UI ui = new UI(320,500);
+        UI ui = new UI(400,600);
         ui.setUI(menu);
 
         int nextStep=menu.run(ui);
@@ -30,7 +30,9 @@ public class Menu implements UIInterface{
                 nextStep = menu.run(ui);
             }else if(nextStep ==2)
             {
-                //do something
+                Game game = new Game();
+                ui.setUI(game);
+                nextStep=game.run(ui);
             }
         }
 
@@ -61,7 +63,21 @@ public class Menu implements UIInterface{
 
         }
 
-        return 0;
+        int returnValue=0;
+        if(selectedMenu==0)
+        {
+            returnValue=2;
+        }
+        if(selectedMenu==1)
+        {
+            returnValue=0;
+        }
+        if(selectedMenu==2)
+        {
+            returnValue=0;
+        }
+
+        return returnValue;
     }
 
     @Override
