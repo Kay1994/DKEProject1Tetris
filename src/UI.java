@@ -103,4 +103,9 @@ class UI extends JPanel {
     {
         uiInterface=ui;
     }
+
+    public void update()
+    {
+        repaint();
+    }
 }

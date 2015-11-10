@@ -10,6 +10,7 @@ import java.awt.geom.Rectangle2D;
  */
 public class Menu implements UIInterface{
 
+    UI ui;
     int selectedMenu=0;
     boolean enterPressed= false;
 
@@ -18,7 +19,7 @@ public class Menu implements UIInterface{
         UI ui = new UI(320,500);
         ui.setUI(menu);
 
-        int nextStep=menu.run();
+        int nextStep=menu.run(ui);
 
         while(nextStep>0)
         {
@@ -26,7 +27,7 @@ public class Menu implements UIInterface{
             {
                 menu = new Menu();
                 ui.setUI(menu);
-                nextStep = menu.run();
+                nextStep = menu.run(ui);
             }else if(nextStep ==2)
             {
                 //do something
@@ -38,14 +39,22 @@ public class Menu implements UIInterface{
 
     @Override
     public void paint(Graphics2D localGraphics2D) {
-        localGraphics2D.setColor(Color.orange);
-        localGraphics2D.fill(new Rectangle2D.Double(32,32,256,64));
-        localGraphics2D.fill(new Rectangle2D.Double(32,128,256,64));
-        localGraphics2D.fill(new Rectangle2D.Double(32,256-32,256,64));
+        for(int i=0;i<3;i++) {
+            if(selectedMenu==i)
+            {
+                localGraphics2D.setColor(Color.red);
+            }
+            else {
+                localGraphics2D.setColor(Color.orange);
+            }
+            localGraphics2D.fill(new Rectangle2D.Double(32, 32+i*96, 256, 64));
+        }
     }
 
     @Override
-    public int run() {
+    public int run(UI ui) {
+
+        this.ui=ui;
 
         while(!enterPressed)
         {
@@ -57,12 +66,17 @@ public class Menu implements UIInterface{
 
     @Override
     public void keyReleased(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
         if(e.getKeyCode()==KeyEvent.VK_ENTER)
         {
             enterPressed=true;
         }else if(e.getKeyCode()==KeyEvent.VK_DOWN)
         {
-            if(selectedMenu<3){
+            if(selectedMenu<2){
                 selectedMenu++;
             }
         }else if(e.getKeyCode()==KeyEvent.VK_UP)
@@ -71,11 +85,7 @@ public class Menu implements UIInterface{
                 selectedMenu--;
             }
         }
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-
+        ui.update();
     }
 
     @Override

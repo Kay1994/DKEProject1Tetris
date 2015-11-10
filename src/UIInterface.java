@@ -8,7 +8,7 @@ import java.awt.event.MouseEvent;
  */
 public interface UIInterface {
     void paint(Graphics2D localGraphics2D);
-    int run();
+    int run(UI ui);
     void keyReleased(KeyEvent e);
     void keyPressed(KeyEvent e);
     void keyTyped(KeyEvent e);
