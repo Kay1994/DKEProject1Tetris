@@ -8,7 +8,7 @@ import java.awt.geom.Rectangle2D;
 /**
  * Created by Philippe on 11/10/2015.
  */
-public class Menu implements UIInterface{
+public class Menu extends UIInterface{
 
     UI ui;
     int selectedMenu=0;
@@ -30,18 +30,38 @@ public class Menu implements UIInterface{
                 nextStep = menu.run(ui);
             }else if(nextStep ==2)
             {
-                Game game = new Game();
-                ui.setUI(game);
-                nextStep=game.run(ui);
+                GameControl gameControl = new GameControl();
+                ui.setUI(gameControl);
+                nextStep=gameControl.run(ui);
+            }else if(nextStep ==3)
+            {
+                GameBot gameBot = new GameBot();
+                ui.setUI(gameBot);
+                nextStep=gameBot.run(ui);
+            }
+            else if(nextStep ==4)
+            {
+                Highscore highscore = new Highscore();
+                ui.setUI(highscore);
+                nextStep=highscore.run(ui);
+            }
+            else if(nextStep == 5)
+            {
+                Settings settings = new Settings();
+                ui.setUI(settings);
+                nextStep=settings.run(ui);
+            }else
+            {
+                //unknow action
+                nextStep=0;
             }
         }
 
         System.exit(0);
     }
 
-    @Override
     public void paint(Graphics2D localGraphics2D) {
-        for(int i=0;i<3;i++) {
+        for(int i=0;i<5;i++) {
             if(selectedMenu==i)
             {
                 localGraphics2D.setColor(Color.red);
@@ -51,16 +71,27 @@ public class Menu implements UIInterface{
             }
             localGraphics2D.fill(new Rectangle2D.Double(32, 32+i*96, 256, 64));
         }
+        localGraphics2D.setColor(Color.BLACK);
+		localGraphics2D.drawString("Play", 32+8, 32+0*96+16);
+        localGraphics2D.drawString("Bot", 32+8, 32+1*96+16);
+        localGraphics2D.drawString("Highscore", 32+8, 32+2*96+16);
+        localGraphics2D.drawString("Settings", 32+8, 32+3*96+16);
+        localGraphics2D.drawString("Exit", 32+8, 32+4*96+16);
+
     }
 
-    @Override
     public int run(UI ui) {
 
         this.ui=ui;
 
         while(!enterPressed)
         {
-
+            //slow down procces
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         int returnValue=0;
@@ -68,21 +99,20 @@ public class Menu implements UIInterface{
         {
             returnValue=2;
         }
-        if(selectedMenu==1)
+        else if(selectedMenu==1)
         {
-            returnValue=0;
+            returnValue=3;
         }
-        if(selectedMenu==2)
+        else if(selectedMenu==2)
         {
-            returnValue=0;
+            returnValue=4;
+        }
+        else if(selectedMenu==3)
+        {
+            returnValue=5;
         }
 
         return returnValue;
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-
     }
 
     @Override
@@ -92,7 +122,7 @@ public class Menu implements UIInterface{
             enterPressed=true;
         }else if(e.getKeyCode()==KeyEvent.VK_DOWN)
         {
-            if(selectedMenu<2){
+            if(selectedMenu<4){
                 selectedMenu++;
             }
         }else if(e.getKeyCode()==KeyEvent.VK_UP)
@@ -102,34 +132,5 @@ public class Menu implements UIInterface{
             }
         }
         ui.update();
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
     }
 }

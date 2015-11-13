@@ -1,15 +1,4 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Toolkit;
-import java.awt.geom.Rectangle2D;
-import java.util.Scanner;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,9 +6,8 @@ import java.awt.Point;
 import java.lang.Math;
 import java.awt.event.*;
 
-public class Game implements UIInterface
+public class Game
 {
-	private UI ui;
 	private int score;
 	private Pentomino activePentomino;
 	private Pentomino storagedPentomino;
@@ -28,87 +16,82 @@ public class Game implements UIInterface
 	private Board gameBoard;
     private int[][] matrix=null;
 
-	public void sideMove(int direction)
-	{
-		//+1 right, -1 left
-		boolean legalMove = true;
-		for (Point p : activePentomino.getLocation())
+	Game(int width, int height, int randomBlocks, int tick){
+		//Setup for the board, UI and the first pentomino.
+		gameBoard = new Board(width,height,3,randomBlocks);
+		pentominoLocation = new Point(width/2, 0);
+		activePentomino = new Pentomino((int)(Math.random()*12));
+
+		/** Makes the active pentomino fall one step each time it's called.
+		 *
+		 */
+		/*START-OF-BLOCKFALL-CLASS*/
+		class BlockFall implements ActionListener
 		{
-			int newX = (int)(p.getX() + pentominoLocation.getX() + direction);
-			int newY = (int)(p.getY() + pentominoLocation.getY());
-			if (newX < 0 || newX >= gameBoard.getBoard().length) legalMove = false;
+			/** Executes the fall.
+			 */
+			public void actionPerformed(ActionEvent e)
+			{
+				if (activePentomino == null)
+				{
+					pentominoLocation = new Point(gameBoard.getWidth()/2, 0);
+					activePentomino = nextPentomino1;
+					nextPentomino1 = new Pentomino((int)(Math.random()*12));
+				}
+				//If the next drop is legal we move the piece and make a tmpBoard, which contains the changes.
+				//This way the original board remains unchanged and we can change the UI without changing the gameBoard.
+				if (nextDropLegal(activePentomino, gameBoard.getBoard()))
+				{
+					//Move pentomino
+					pentominoLocation.setLocation(pentominoLocation.getX(), pentominoLocation.getY()+1);
+					int[][] tmpBoard = new int[gameBoard.getBoard().length][gameBoard.getBoard()[0].length];
+					//Copy the old board to the tmp
+					for (int i = 0; i < gameBoard.getBoard().length; i++)
+					{
+						for (int j = 0; j < gameBoard.getBoard()[i].length; j++)
+						{
+							tmpBoard[i][j] = gameBoard.getBoard()[i][j];
+						}
+					}
+					//Add the pentomino to the tmpBoard
+					for (Point p : activePentomino.getLocation())
+					{
+						int newX = (int)(pentominoLocation.getX() + p.getX());
+						int newY = (int)(pentominoLocation.getY() + p.getY());
+						if (newY >= 0)
+							tmpBoard[newX][newY] = activePentomino.getID();
+					}
+
+					matrix = tmpBoard;
+				}
+				//If not, lock the piece to gameBoard, erase the full rows and add score accordingly.
+				else
+				{
+					for (Point p : activePentomino.getLocation())
+					{
+						int newX = (int)(pentominoLocation.getX() + p.getX());
+						int newY = (int)(pentominoLocation.getY() + p.getY());
+						if (newY >= 0 && newY < gameBoard.getBoard()[0].length)
+							gameBoard.getBoard()[newX][newY] = activePentomino.getID();
+					}
+					/*This part also needs to update the score display*/
+					//Something weird happens with this command:
+					//addScore(gameBoard.removeFullRows());
+					/*Something to do with the Board class maybe?*/
+					String[] scoreText = {Integer.toString(score)};
+					matrix=gameBoard.getBoard();
+					activePentomino = null;
+				}
+			}
 		}
-		if (legalMove) pentominoLocation.setLocation((pentominoLocation.getX() + direction), pentominoLocation.getY());
+		/*END-OF-BLOCKFALL-CLASS*/
+		//Setup for the method to make the pentomino fall and the timer which controls it. I.E. this makes the game run.
+		BlockFall blockFall = new BlockFall();
+		int tickLength = tick;
+		Timer t = new Timer(tickLength, blockFall);
+		t.start();
 	}
 
-	public void downMove()
-	{
-		//Drop the pentomino
-	}
-
-	public void transform(int mutation)
-	{
-		//+1 rotate, -1 mirror
-	}
-
-	@Override
-	public void paint(Graphics2D localGraphics2D) {
-		//cast grapics to a 2D graphics
-		//clear everything
-        if(matrix!=null) {
-            localGraphics2D.setColor(Color.LIGHT_GRAY);
-            localGraphics2D.fill(ui.getVisibleRect());
-
-            int squaresize = 20;
-
-            //draw lines
-            localGraphics2D.setColor(Color.GRAY);
-            for (int i = 0; i <= matrix.length; i++) {
-                localGraphics2D.drawLine(i * squaresize, 0, i * squaresize, matrix[0].length * squaresize);
-            }
-            for (int i = 0; i <= matrix[0].length; i++) {
-                localGraphics2D.drawLine(0, i * squaresize, matrix.length * squaresize, i * squaresize);
-            }
-
-            //draw blocks
-            for (int i = 0; i < matrix.length; i++) {
-                for (int j = 0; j < matrix[0].length; j++) {
-                    localGraphics2D.setColor(GetColorOfID(matrix[i][j]));
-                    localGraphics2D.fill(new Rectangle2D.Double(i * squaresize + 1, j * squaresize + 1, squaresize - 1, squaresize - 1));
-                }
-            }
-        }
-		//draw text
-		/*localGraphics2D.setColor(Color.BLACK);
-		for (int i = 0; i < text.length; i++)
-		{
-			localGraphics2D.drawString(text[i], 0, matrix[0].length * squaresize+i*16+16);
-		}*/
-	}
-
-    private Color GetColorOfID(int i)
-    {
-        if(i==0) {return Color.BLUE;}
-        else if(i==1) {return Color.ORANGE;}
-        else if(i==2) {return Color.CYAN;}
-        else if(i==3) {return Color.GREEN;}
-        else if(i==4) {return Color.MAGENTA;}
-        else if(i==5) {return Color.PINK;}
-        else if(i==6) {return Color.RED;}
-        else if(i==7) {return Color.YELLOW;}
-        else if(i==8) {return new Color(0, 0, 0);}
-        else if(i==9) {return new Color(0, 0, 100);}
-        else if(i==10) {return new Color(100, 0,0);}
-        else if(i==11) {return new Color(0, 100, 0);}
-        else {return Color.LIGHT_GRAY;}
-    }
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-
-	}
-
-	@Override
 	public void keyPressed(KeyEvent e) {
 		int direction = 0;
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) direction = -1;
@@ -129,114 +112,36 @@ public class Game implements UIInterface
 		}
 	}
 
-	@Override
-	public void keyTyped(KeyEvent e) {
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-
-	}
-
-    @Override
-	public int run(UI ui)
+	public int[][] getMatrix()
 	{
-        this.ui = ui;
-        int width=13; int height=24; int randomBlocks=0; int tick=500;
-		//Setup for the board, UI and the first pentomino.
-		gameBoard = new Board(width,height,3,randomBlocks);
-		pentominoLocation = new Point(width/2, 0);
-		activePentomino = new Pentomino((int)(Math.random()*12));
-
-        while(gameBoard.isTheGameLost())
-        {
-            if (activePentomino == null)
-            {
-                pentominoLocation = new Point(gameBoard.getWidth()/2, 0);
-                activePentomino = nextPentomino1;
-                nextPentomino1 = new Pentomino((int)(Math.random()*12));
-            }
-            //If the next drop is legal we move the piece and make a tmpBoard, which contains the changes.
-            //This way the original board remains unchanged and we can change the UI without changing the gameBoard.
-            if (nextDropLegal(activePentomino, gameBoard.getBoard()))
-            {
-                //Move pentomino
-                pentominoLocation.setLocation(pentominoLocation.getX(), pentominoLocation.getY()+1);
-                int[][] tmpBoard = new int[gameBoard.getBoard().length][gameBoard.getBoard()[0].length];
-                //Copy the old board to the tmp
-                for (int i = 0; i < gameBoard.getBoard().length; i++)
-                {
-                    for (int j = 0; j < gameBoard.getBoard()[i].length; j++)
-                    {
-                        tmpBoard[i][j] = gameBoard.getBoard()[i][j];
-                    }
-                }
-                //Add the pentomino to the tmpBoard
-                for (Point p : activePentomino.getLocation())
-                {
-                    int newX = (int)(pentominoLocation.getX() + p.getX());
-                    int newY = (int)(pentominoLocation.getY() + p.getY());
-                    if (newY >= 0)
-                        tmpBoard[newX][newY] = activePentomino.getID();
-                }
-                matrix=tmpBoard;
-            }
-            //If not, lock the piece to gameBoard, erase the full rows and add score accordingly.
-            else
-            {
-                for (Point p : activePentomino.getLocation())
-                {
-                    int newX = (int)(pentominoLocation.getX() + p.getX());
-                    int newY = (int)(pentominoLocation.getY() + p.getY());
-                    if (newY >= 0 && newY < gameBoard.getBoard()[0].length)
-                        gameBoard.getBoard()[newX][newY] = activePentomino.getID();
-                }
-					/*This part also needs to update the score display*/
-                //Something weird happens with this command:
-                //addScore(gameBoard.removeFullRows());
-					/*Something to do with the Board class maybe?*/
-                String[] scoreText = {Integer.toString(score)};
-                activePentomino = null;
-            }
-            ui.update();
-            try {
-                Thread.sleep(tick);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return 1;
+		return matrix;
 	}
 
+	public void sideMove(int direction) {
+		//+1 right, -1 left
+		boolean legalMove = true;
+		for (Point p : activePentomino.getLocation())
+		{
+			int newX = (int)(p.getX() + pentominoLocation.getX() + direction);
+			int newY = (int)(p.getY() + pentominoLocation.getY());
+			if (newX < 0 || newX >= gameBoard.getBoard().length) legalMove = false;
+		}
+		if (legalMove) pentominoLocation.setLocation((pentominoLocation.getX() + direction), pentominoLocation.getY());
+	}
+
+	public void downMove() {
+		//Drop the pentomino
+	}
+
+	public void transform(int mutation) {
+		//+1 rotate, -1 mirror
+	}
 
 	/** Checks if the falling pentomino can fall further.
 	 * @param pentomino The pentomino piece which is currently falling.
 	 * @param board The board in which the pentomino currently is.
 	 */
-	public boolean nextDropLegal(Pentomino pentomino, int[][] board)
-	{
+	public boolean nextDropLegal(Pentomino pentomino, int[][] board) {
 		boolean legalMove = true;
 		//Self-explanatory. Just checks the next block to 'fall' to for all blocks of the pentomino
 		for (Point p : pentomino.getLocation())
@@ -248,13 +153,14 @@ public class Game implements UIInterface
 		return legalMove;
 	}
 
+	public boolean gameFinished(){return !gameBoard.isTheGameLost();}
+
 	/** Checks if the score is high enough to get to the high scores list, adds the name and score and organizes the list.
 	 *  If HighScores.dat is not found, the method generates a blank one.
 	 * @param name The nickname of the person getting to the list.
 	 * @param score The score gained.
 	 */
-	public static void addHighScore(String name, int score)
-	{
+	public static void addHighScore(String name, int score) {
 
 		//If we don't yet have a high scores table, we create a blank (and let the user know about it)
 		if (!new File("HighScores.dat").exists())
@@ -336,8 +242,7 @@ public class Game implements UIInterface
 	/** A getter for the high scores list. Reads it directly from file and throws an error if the file is not found (!working on this!).
 	 * @return Object[][] where [i][0] is the rank (String), [i][1] is the name (String) and [i][2] is the score (Integer).
 	 */
-	public static Object[][] getHighScore()
-	{
+	public static Object[][] getHighScore() {
 		try
 		{
 			//Read and return the read object matrix
