@@ -154,7 +154,7 @@ public class Game
 		return legalMove;
 	}
 
-	public boolean gameFinished(){return !gameBoard.isTheGameLost();}
+	public boolean gameFinished(){return gameBoard.isTheGameLost();}
 
 	/** Checks if the score is high enough to get to the high scores list, adds the name and score and organizes the list.
 	 *  If HighScores.dat is not found, the method generates a blank one.

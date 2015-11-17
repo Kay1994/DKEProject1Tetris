@@ -1,7 +1,4 @@
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -95,8 +92,13 @@ class UI extends JPanel {
 
     protected void paintComponent(Graphics g)
     {
+        Graphics2D localGraphics2D = (Graphics2D)g;
+
+        localGraphics2D.setColor(Color.LIGHT_GRAY);
+        localGraphics2D.fill(getVisibleRect());
+
         if(uiInterface!=null)
-            uiInterface.paint((Graphics2D)g);
+            uiInterface.paint(localGraphics2D);
     }
 
     public void setUI(UIInterface ui)

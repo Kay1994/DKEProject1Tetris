@@ -61,6 +61,7 @@ public class Menu extends UIInterface{
     }
 
     public void paint(Graphics2D localGraphics2D) {
+
         for(int i=0;i<5;i++) {
             if(selectedMenu==i)
             {

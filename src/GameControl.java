@@ -79,6 +79,7 @@ public class GameControl extends UIInterface {
             }
         }
 
+        System.out.println("test");
         return 1;
     }
 

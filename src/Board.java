@@ -105,8 +105,6 @@ public class Board {
         if (fullRows.size() > 0){
             for (int k = 0 ; k < fullRows.size() ; k++){
                 for (int i = 0 ; i < board.length ; i++){
-                    board[i][fullRows.get(k)] = -1;
-
                     for(int j=fullRows.get(k);j>0;j--)
                     {
                         board[i][j]=board[i][j-1];
@@ -124,12 +122,10 @@ public class Board {
      * @return True if game is lost, false if game is not lost yet.
      */
     public boolean isTheGameLost(){
-        for (int i = 0 ; i < invisibleRows ; i++){
-            for (int j = 0 ; j < board[i].length ; j++){
-                if (board[i][j] != -1){
+        for (int i = 0 ; i <  board.length; i++){
+                if (board[i][0] != -1){
                     return true;
                 }
-            }
         }
         return false;
     }
