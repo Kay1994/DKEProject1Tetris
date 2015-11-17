@@ -21,6 +21,7 @@ public class Game
 		gameBoard = new Board(width,height,3,randomBlocks);
 		pentominoLocation = new Point(width/2, 0);
 		activePentomino = new Pentomino((int)(Math.random()*12));
+		nextPentomino1 = new Pentomino((int)(Math.random()*12));
 
 		/** Makes the active pentomino fall one step each time it's called.
 		 *
@@ -43,7 +44,7 @@ public class Game
 				if (nextDropLegal(activePentomino, gameBoard.getBoard()))
 				{
 					//Move pentomino
-					pentominoLocation.setLocation(pentominoLocation.getX(), pentominoLocation.getY()+1);
+					pentominoLocation.setLocation(pentominoLocation.getX(), pentominoLocation.getY() + 1);
 					int[][] tmpBoard = new int[gameBoard.getBoard().length][gameBoard.getBoard()[0].length];
 					//Copy the old board to the tmp
 					for (int i = 0; i < gameBoard.getBoard().length; i++)
@@ -76,7 +77,7 @@ public class Game
 					}
 					/*This part also needs to update the score display*/
 					//Something weird happens with this command:
-					//addScore(gameBoard.removeFullRows());
+					addScore(gameBoard.removeFullRows());
 					/*Something to do with the Board class maybe?*/
 					String[] scoreText = {Integer.toString(score)};
 					matrix=gameBoard.getBoard();

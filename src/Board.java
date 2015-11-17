@@ -74,7 +74,6 @@ public class Board {
      */
     public ArrayList<Integer> fullRowCheck(){
 
-        board = getBoard();
         ArrayList<Integer> fullRows = new ArrayList<Integer>();
         for (int i = 0; i < board[0].length; i++){
             int count = 0;
@@ -96,9 +95,6 @@ public class Board {
      * @return how many rows were removed
      */
     public int removeFullRows() {
-        board = getBoard();
-
-
 
         ArrayList<Integer> fullRows =fullRowCheck();
         Collections.sort(fullRows);
@@ -116,13 +112,7 @@ public class Board {
                         board[i][j]=board[i][j-1];
                     }
                 }
-
             }
-
-
-
-
-
         }
         fullRows.clear();
 
